@@ -1,5 +1,6 @@
 require 'nn'
 require 'graph'
+require 'dpnn'
 
 nngraph = {}
 
@@ -39,7 +40,7 @@ function Module:__call__(...)
    if not istable(input) then
       input = {input}
    end
-   local mnode = nngraph.Node({module=self})
+   local mnode = nngraph.Node({module=self:sharedClone(true,true,true)})
 
    local dnode
    for i = 1, utils.tableMaxN(input) do
