@@ -495,6 +495,14 @@ function gModule:read(file)
    end
 end
 
+function gModule:recycleNodeClones()
+	for _, node in ipairs(self.forwardnodes) do
+		if node.data.prototype then
+			node.data.prototype:recycleClones()
+		end
+	end
+end
+
 
 function gModule:__tostring__()
    return self.name or torch.type(self)

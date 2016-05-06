@@ -40,7 +40,7 @@ function Module:__call__(...)
    if not istable(input) then
       input = {input}
    end
-   local mnode = nngraph.Node({module=self:sharedClone(true,true,true)})
+   local mnode = nngraph.Node({module=self:getGraphClone(), prototype=self})
 
    local dnode
    for i = 1, utils.tableMaxN(input) do
@@ -52,6 +52,33 @@ function Module:__call__(...)
    end
 
    return mnode
+end
+
+local graphClones = {}
+local gcMeta = {}
+setmetatable(graphClones, gcMeta)
+gcMeta.__mode = "k"
+
+function Module:getGraphClone()
+	if not graphClones[self] then
+		graphClones[self] = {}
+	end
+	clones = graphClones[self]
+	self.nextClone = self.nextClone or 1
+	local clone = nil
+	if self.nextClone <= #clones then
+		clone = clones[self.nextClone]
+	else
+		assert(self.nextClone == #clones + 1)
+		clone = self:sharedClone(true, true, true)
+		table.insert(clones, clone)
+	end
+	self.nextClone = self.nextClone + 1
+	return clone
+end
+
+function Module:recycleClones()
+	self.nextClone = 1
 end
 
 local Criterion = torch.getmetatable('nn.Criterion')
